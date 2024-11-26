@@ -272,17 +272,29 @@
     <Content Include="Views\Usuarios\Details.cshtml" />
     <Content Include="Views\Usuarios\Edit.cshtml" />
     <Content Include="Views\Usuarios\Index.cshtml" />
+    <Content Include="Views\Pedido\Create.cshtml" />
+    <Content Include="Views\Pedido\Delete.cshtml" />
+    <Content Include="Views\Pedido\Details.cshtml" />
+    <Content Include="Views\Pedido\Edit.cshtml" />
+    <Content Include="Views\Pedido\Index.cshtml" />
+    <Content Include="Views\Carrito\Create.cshtml" />
+    <Content Include="Views\Carrito\Delete.cshtml" />
+    <Content Include="Views\Carrito\Details.cshtml" />
+    <Content Include="Views\Carrito\Edit.cshtml" />
+    <Content Include="Views\Carrito\Index.cshtml" />
+    <Content Include="Views\Historial\Create.cshtml" />
+    <Content Include="Views\Historial\Delete.cshtml" />
+    <Content Include="Views\Historial\Details.cshtml" />
+    <Content Include="Views\Historial\Edit.cshtml" />
+    <Content Include="Views\Historial\Index.cshtml" />
+    <Content Include="Views\Producto\Create.cshtml" />
+    <Content Include="Views\Producto\Delete.cshtml" />
+    <Content Include="Views\Producto\Details.cshtml" />
+    <Content Include="Views\Producto\Edit.cshtml" />
+    <Content Include="Views\Producto\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Views\Carritoes\" />
-    <Folder Include="Views\Carrito\" />
-    <Folder Include="Views\Historials\" />
-    <Folder Include="Views\Historial\" />
-    <Folder Include="Views\Pedidoes\" />
-    <Folder Include="Views\Pedido\" />
-    <Folder Include="Views\Productoes\" />
-    <Folder Include="Views\Producto\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
