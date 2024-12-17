@@ -6,14 +6,14 @@ namespace Proyecto_BazarLibreria.Migrations
     using System.Data.Entity.Migrations.Infrastructure;
     using System.Resources;
     
-    [GeneratedCode("EntityFramework.Migrations", "6.4.4")]
-    public sealed partial class Datos_Bazar : IMigrationMetadata
+    [GeneratedCode("EntityFramework.Migrations", "6.5.1")]
+    public sealed partial class InitialCreate : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(Datos_Bazar));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(InitialCreate));
         
         string IMigrationMetadata.Id
         {
-            get { return "202411241507018_Datos_Bazar"; }
+            get { return "202412171723340_InitialCreate"; }
         }
         
         string IMigrationMetadata.Source
