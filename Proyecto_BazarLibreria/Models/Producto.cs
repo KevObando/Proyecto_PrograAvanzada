@@ -31,11 +31,13 @@ namespace Proyecto_BazarLibreria.Models
 
     public class Reseña
     {
-        public int Id { get; set; } // PK
-        public int ProductoCodigo { get; set; } // FK
-        public Producto Producto { get; set; }
+        public int Id { get; set; }
+        public int ProductoId { get; set; }
+        public string Usuario { get; set; }
         public string Comentario { get; set; }
-        public int Calificacion { get; set; } // De 1 a 5
+        public int Calificación { get; set; }  // Por ejemplo, una calificación de 1 a 5
         public DateTime Fecha { get; set; }
+
+        public virtual Producto Producto { get; set; }
     }
 }

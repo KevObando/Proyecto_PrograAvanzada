@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -27,7 +28,10 @@ namespace Proyecto_BazarLibreria.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Producto producto = db.Productos.Find(id);
+            var producto = db.Productos
+                             .Include(p => p.Imagenes) // Incluye las imágenes asociadas
+                             .FirstOrDefault(p => p.Codigo == id);
+
             if (producto == null)
             {
                 return HttpNotFound();
@@ -65,11 +69,14 @@ namespace Proyecto_BazarLibreria.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Producto producto = db.Productos.Find(id);
+
+            Producto producto = db.Productos.Include(p => p.Imagenes).FirstOrDefault(p => p.Codigo == id);
+
             if (producto == null)
             {
                 return HttpNotFound();
             }
+
             return View(producto);
         }
 
@@ -78,10 +85,38 @@ namespace Proyecto_BazarLibreria.Controllers
         // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Codigo,Nombre,Precio,Disponibilidad,Estado")] Producto producto)
+        public ActionResult Edit(Producto producto, HttpPostedFileBase imagen)
         {
             if (ModelState.IsValid)
             {
+                if (imagen != null && imagen.ContentLength > 0)
+                {
+                    // Ruta donde se guardarán las imágenes
+                    string carpetaImagenes = Server.MapPath("~/imagenes");
+
+                    // Verifica si el directorio existe, y si no, lo crea
+                    if (!Directory.Exists(carpetaImagenes))
+                    {
+                        Directory.CreateDirectory(carpetaImagenes);
+                    }
+
+                    // Construye la ruta completa
+                    string rutaCompleta = Path.Combine(carpetaImagenes, Path.GetFileName(imagen.FileName));
+
+                    // Guarda la imagen en el servidor
+                    imagen.SaveAs(rutaCompleta);
+
+                    // Asocia la imagen con el producto
+                    var nuevaImagen = new Imagen
+                    {
+                        Url = "~/imagenes/" + imagen.FileName,
+                        ProductoCodigo = producto.Codigo
+                    };
+
+                    // Agrega la imagen al producto
+                    db.Imagenes.Add(nuevaImagen);
+                }
+
                 db.Entry(producto).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -113,6 +148,65 @@ namespace Proyecto_BazarLibreria.Controllers
             db.Productos.Remove(producto);
             db.SaveChanges();
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public ActionResult EliminarImagen(int imagenId)
+        {
+            // Busca la imagen en la base de datos
+            var imagen = db.Imagenes.Find(imagenId);
+            if (imagen == null)
+            {
+                return HttpNotFound();
+            }
+
+            // Elimina el archivo físico si existe
+            var rutaImagen = Server.MapPath(imagen.Url);
+            if (System.IO.File.Exists(rutaImagen))
+            {
+                System.IO.File.Delete(rutaImagen);
+            }
+
+            // Elimina la imagen de la base de datos
+            db.Imagenes.Remove(imagen);
+            db.SaveChanges();
+
+            // Redirige al detalle del producto después de eliminar la imagen
+            return RedirectToAction("Details", new { id = imagen.ProductoCodigo });
+        }
+
+        // POST: Producto/AgregarReseña
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AgregarReseña(int productoId, string comentario, int rating, string usuario)
+        {
+            if (ModelState.IsValid)
+            {
+                // Encuentra el producto por su ID
+                var producto = db.Productos.FirstOrDefault(p => p.Codigo == productoId);
+                if (producto != null)
+                {
+                    // Crea una nueva reseña
+                    var nuevaReseña = new Reseña
+                    {
+                        Comentario = comentario,
+                        Calificación = rating,
+                        Fecha = DateTime.Now,
+                        ProductoId = productoId,
+                        Usuario = usuario // Guardamos el nombre de usuario
+                    };
+
+                    // Agrega la reseña a la base de datos
+                    db.Reseñas.Add(nuevaReseña);
+                    db.SaveChanges();
+
+                    // Redirige al detalle del producto
+                    return RedirectToAction("Details", new { id = productoId });
+                }
+            }
+
+            // Si algo sale mal, vuelve a la vista de detalles del producto
+            return RedirectToAction("Details", new { id = productoId });
         }
 
         protected override void Dispose(bool disposing)

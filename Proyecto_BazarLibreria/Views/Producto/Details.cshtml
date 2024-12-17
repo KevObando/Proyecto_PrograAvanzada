@@ -1,50 +1,112 @@
 ﻿@model Proyecto_BazarLibreria.Models.Producto
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Detalles del Producto";
 }
 
-<h2>Details</h2>
+<h2>Detalles del Producto</h2>
 
 <div>
-    <h4>Producto</h4>
+    <h4>Producto: @Model.Nombre</h4>
     <hr />
     <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
+        <dt>Código</dt>
+        <dd>@Model.Codigo</dd>
 
+        <dt>Precio</dt>
+        <dd>@Model.Precio</dd>
+
+        <dt>Disponibilidad</dt>
+        <dd>@Model.Disponibilidad ? "Disponible" : "No disponible"</dd>
+
+        <dt>Estado</dt>
+        <dd>@Model.Estado</dd>
+
+        <dt>Imagen</dt>
         <dd>
-            @Html.DisplayFor(model => model.Nombre)
+            @if (Model.Imagenes != null && Model.Imagenes.Any())
+            {
+                foreach (var imagen in Model.Imagenes)
+                {
+                    <div style="margin-bottom: 15px;">
+                        <!-- Mostrar la imagen -->
+                        <img src="@Url.Content(imagen.Url)" alt="Imagen Producto" style="max-width: 300px; height: auto;" />
+                        <br />
+
+                        <!-- Formulario para eliminar la imagen -->
+                        @using (Html.BeginForm("EliminarImagen", "Producto", FormMethod.Post))
+                        {
+                            @Html.Hidden("imagenId", imagen.Id)
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Está seguro de que desea eliminar esta imagen?')">Eliminar</button>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No hay imagen disponible.</p>
+            }
         </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Precio)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Precio)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Disponibilidad)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Disponibilidad)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Estado)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Estado)
-        </dd>
-
     </dl>
+
+    <!-- Mostrar las reseñas -->
+    <h3>Reseñas del Producto</h3>
+    @if (Model.Reseñas != null && Model.Reseñas.Any())
+    {
+        <ul>
+            @foreach (var reseña in Model.Reseñas)
+            {
+                <li>
+                    <strong>@reseña.Usuario</strong> - <em>@reseña.Fecha.ToString("dd/MM/yyyy")</em>
+                    <br />
+                    <strong>Comentario:</strong> @reseña.Comentario
+                    <br />
+                    <strong>Calificación:</strong> @reseña.Calificación estrellas
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>No hay reseñas para este producto.</p>
+    }
+
+    <!-- Formulario para agregar una nueva reseña -->
+    <h3>Agregar una reseña</h3>
+    @using (Html.BeginForm("AgregarReseña", "Producto", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("productoId", Model.Codigo)
+
+        <div class="form-group">
+            @Html.Label("Nombre de Usuario")
+            @Html.TextBox("usuario", null, new { @class = "form-control", required = "required" })
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Comentario")
+            @Html.TextArea("comentario", null, new { @class = "form-control", rows = 4, required = "required" })
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Calificación")
+            @Html.DropDownList("rating", new SelectList(Enumerable.Range(1, 5)), "Seleccionar", new { @class = "form-control", required = "required" })
+        </div>
+
+        <button type="submit" class="btn btn-success">Agregar Reseña</button>
+    }
+
+    <br />
+    <!-- Botón para editar el producto -->
+    <div>
+        @Html.ActionLink("Editar", "Edit", new { id = Model.Codigo }, new { @class = "btn btn-primary" })
+    </div>
+
+    <br />
+    <!-- Enlace para volver al índice de productos -->
+    @Html.ActionLink("Volver a la lista de productos", "Index", null, new { @class = "btn btn-default" })
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Codigo }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
