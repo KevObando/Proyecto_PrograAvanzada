@@ -181,6 +181,10 @@
     <Compile Include="Migrations\202412170045223_NombreDeLaMigración.Designer.cs">
       <DependentUpon>202412170045223_NombreDeLaMigración.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202412170528010_AddCarritoItems.cs" />
+    <Compile Include="Migrations\202412170528010_AddCarritoItems.Designer.cs">
+      <DependentUpon>202412170528010_AddCarritoItems.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Carrito.cs" />
@@ -327,6 +331,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202412170045223_NombreDeLaMigración.resx">
       <DependentUpon>202412170045223_NombreDeLaMigración.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202412170528010_AddCarritoItems.resx">
+      <DependentUpon>202412170528010_AddCarritoItems.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

@@ -18,7 +18,7 @@ namespace Proyecto_BazarLibreria.Models
         // Relación con otras tablas
         public ICollection<Imagen> Imagenes { get; set; }
         public ICollection<Reseña> Reseñas { get; set; }
-        public ICollection<CarritoProducto> CarritoProductos { get; set; }
+        public ICollection<CarritoItem> CarritoItems { get; set; }
     }
     public class Imagen
     {

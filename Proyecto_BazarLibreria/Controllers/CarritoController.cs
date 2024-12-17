@@ -6,127 +6,135 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNet.Identity;
 using Proyecto_BazarLibreria.Models;
+
 
 namespace Proyecto_BazarLibreria.Controllers
 {
+    [Authorize]
     public class CarritoController : Controller
     {
-        private LibreriaBazarDbContext db = new LibreriaBazarDbContext();
+        private readonly LibreriaBazarDbContext _context;
 
-        // GET: Carrito
+        public CarritoController()
+        {
+            _context = new LibreriaBazarDbContext();
+        }
+
+        // Vista principal del carrito
         public ActionResult Index()
         {
-            var carritos = db.Carritos.Include(c => c.Usuario);
-            return View(carritos.ToList());
-        }
+            var userId = User.Identity.Name; // Obtén el nombre del usuario autenticado
 
-        // GET: Carrito/Details/5
-        public ActionResult Details(int? id)
-        {
-            if (id == null)
+            if (string.IsNullOrEmpty(userId))
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return RedirectToAction("Login", "Account"); // Redirige si no hay usuario autenticado
             }
-            Carrito carrito = db.Carritos.Find(id);
-            if (carrito == null)
-            {
-                return HttpNotFound();
-            }
+
+            var carrito = _context.CarritoItems
+                .Where(c => c.UserId == userId)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.ProductoId,
+                    c.Cantidad,
+                    ProductoNombre = c.Producto.Nombre,
+                    ProductoPrecio = c.Producto.Precio,
+                    Total = c.Producto.Precio * c.Cantidad
+                })
+                .ToList();
+
+            ViewBag.TotalCarrito = carrito.Sum(c => c.Total);
             return View(carrito);
         }
 
-        // GET: Carrito/Create
-        public ActionResult Create()
-        {
-            ViewBag.UsuarioCodigo = new SelectList(db.Usuarios, "Codigo", "Nombre");
-            return View();
-        }
-
-        // POST: Carrito/Create
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
+        // Agregar un producto al carrito
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,UsuarioCodigo,Total")] Carrito carrito)
+        public ActionResult Agregar(int productoId, int cantidad = 1)
         {
-            if (ModelState.IsValid)
+            var userId = User.Identity.Name;
+
+            if (string.IsNullOrEmpty(userId))
             {
-                db.Carritos.Add(carrito);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToAction("Login", "Account");
             }
 
-            ViewBag.UsuarioCodigo = new SelectList(db.Usuarios, "Codigo", "Nombre", carrito.UsuarioCodigo);
-            return View(carrito);
-        }
+            var itemExistente = _context.CarritoItems
+                .FirstOrDefault(c => c.UserId == userId && c.ProductoId == productoId);
 
-        // GET: Carrito/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
+            if (itemExistente != null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                itemExistente.Cantidad += cantidad;
             }
-            Carrito carrito = db.Carritos.Find(id);
-            if (carrito == null)
+            else
             {
-                return HttpNotFound();
+                var nuevoItem = new CarritoItem
+                {
+                    UserId = userId,
+                    ProductoId = productoId,
+                    Cantidad = cantidad,
+                    FechaAgregado = DateTime.Now
+                };
+                _context.CarritoItems.Add(nuevoItem);
             }
-            ViewBag.UsuarioCodigo = new SelectList(db.Usuarios, "Codigo", "Nombre", carrito.UsuarioCodigo);
-            return View(carrito);
-        }
 
-        // POST: Carrito/Edit/5
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,UsuarioCodigo,Total")] Carrito carrito)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Entry(carrito).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            ViewBag.UsuarioCodigo = new SelectList(db.Usuarios, "Codigo", "Nombre", carrito.UsuarioCodigo);
-            return View(carrito);
-        }
-
-        // GET: Carrito/Delete/5
-        public ActionResult Delete(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Carrito carrito = db.Carritos.Find(id);
-            if (carrito == null)
-            {
-                return HttpNotFound();
-            }
-            return View(carrito);
-        }
-
-        // POST: Carrito/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            Carrito carrito = db.Carritos.Find(id);
-            db.Carritos.Remove(carrito);
-            db.SaveChanges();
+            _context.SaveChanges();
             return RedirectToAction("Index");
         }
 
-        protected override void Dispose(bool disposing)
+        // Eliminar un producto del carrito
+        [HttpPost]
+        public ActionResult Eliminar(int id)
         {
-            if (disposing)
+            var item = _context.CarritoItems.FirstOrDefault(c => c.Id == id);
+            if (item != null)
             {
-                db.Dispose();
+                _context.CarritoItems.Remove(item);
+                _context.SaveChanges();
             }
-            base.Dispose(disposing);
+            return RedirectToAction("Index");
+        }
+
+        // Actualizar la cantidad de un producto en el carrito
+        [HttpPost]
+        public ActionResult ActualizarCantidad(int id, int cantidad)
+        {
+            var item = _context.CarritoItems.FirstOrDefault(c => c.Id == id);
+            if (item != null && cantidad > 0)
+            {
+                item.Cantidad = cantidad;
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Index");
+        }
+
+        // Vaciar el carrito
+        [HttpPost]
+        public ActionResult Vaciar()
+        {
+            var userId = User.Identity.Name;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var items = _context.CarritoItems.Where(c => c.UserId == userId).ToList();
+
+            if (items.Any())
+            {
+                _context.CarritoItems.RemoveRange(items);
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }
+    
+
+    
+
+

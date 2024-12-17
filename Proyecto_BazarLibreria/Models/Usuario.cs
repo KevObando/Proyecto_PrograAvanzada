@@ -16,7 +16,7 @@ namespace Proyecto_BazarLibreria.Models
         public bool Estado { get; set; } // Activo/Inactivo
 
         // Relación con otras tablas
-        public ICollection<Carrito> Carritos { get; set; }
+        public ICollection<CarritoItem> Carritos { get; set; }
         public ICollection<Historial> Historiales { get; set; }
     }
 }
