@@ -26,27 +26,15 @@ namespace Proyecto_BazarLibreria.Controllers
         // Vista principal del carrito
         public ActionResult Index()
         {
-            var userId = User.Identity.Name; // Obtén el nombre del usuario autenticado
+            var userId = User.Identity.GetUserId(); // Obtiene el ID único del usuario autenticado
 
-            if (string.IsNullOrEmpty(userId))
-            {
-                return RedirectToAction("Login", "Account"); // Redirige si no hay usuario autenticado
-            }
-
+            // Consulta los elementos del carrito solo para el usuario autenticado
             var carrito = _context.CarritoItems
                 .Where(c => c.UserId == userId)
-                .Select(c => new
-                {
-                    c.Id,
-                    c.ProductoId,
-                    c.Cantidad,
-                    ProductoNombre = c.Producto.Nombre,
-                    ProductoPrecio = c.Producto.Precio,
-                    Total = c.Producto.Precio * c.Cantidad
-                })
+                .Include(c => c.Producto) // Incluye la relación con Producto para obtener los detalles
                 .ToList();
 
-            ViewBag.TotalCarrito = carrito.Sum(c => c.Total);
+            // Retorna la vista con el carrito
             return View(carrito);
         }
 
@@ -54,22 +42,19 @@ namespace Proyecto_BazarLibreria.Controllers
         [HttpPost]
         public ActionResult Agregar(int productoId, int cantidad = 1)
         {
-            var userId = User.Identity.Name;
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return RedirectToAction("Login", "Account");
-            }
+            var userId = User.Identity.GetUserId();
 
             var itemExistente = _context.CarritoItems
                 .FirstOrDefault(c => c.UserId == userId && c.ProductoId == productoId);
 
             if (itemExistente != null)
             {
+                // Si el producto ya está en el carrito, aumenta la cantidad
                 itemExistente.Cantidad += cantidad;
             }
             else
             {
+                // Agregar un nuevo producto al carrito
                 var nuevoItem = new CarritoItem
                 {
                     UserId = userId,
@@ -88,7 +73,9 @@ namespace Proyecto_BazarLibreria.Controllers
         [HttpPost]
         public ActionResult Eliminar(int id)
         {
-            var item = _context.CarritoItems.FirstOrDefault(c => c.Id == id);
+            var userId = User.Identity.GetUserId();
+
+            var item = _context.CarritoItems.FirstOrDefault(c => c.Id == id && c.UserId == userId);
             if (item != null)
             {
                 _context.CarritoItems.Remove(item);
@@ -101,7 +88,9 @@ namespace Proyecto_BazarLibreria.Controllers
         [HttpPost]
         public ActionResult ActualizarCantidad(int id, int cantidad)
         {
-            var item = _context.CarritoItems.FirstOrDefault(c => c.Id == id);
+            var userId = User.Identity.GetUserId();
+
+            var item = _context.CarritoItems.FirstOrDefault(c => c.Id == id && c.UserId == userId);
             if (item != null && cantidad > 0)
             {
                 item.Cantidad = cantidad;
@@ -114,15 +103,9 @@ namespace Proyecto_BazarLibreria.Controllers
         [HttpPost]
         public ActionResult Vaciar()
         {
-            var userId = User.Identity.Name;
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return RedirectToAction("Login", "Account");
-            }
+            var userId = User.Identity.GetUserId();
 
             var items = _context.CarritoItems.Where(c => c.UserId == userId).ToList();
-
             if (items.Any())
             {
                 _context.CarritoItems.RemoveRange(items);
@@ -133,8 +116,9 @@ namespace Proyecto_BazarLibreria.Controllers
         }
     }
 }
-    
 
-    
+
+
+
 
 

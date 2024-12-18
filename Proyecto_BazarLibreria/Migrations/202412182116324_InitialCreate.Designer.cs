@@ -13,7 +13,7 @@ namespace Proyecto_BazarLibreria.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "202412171723340_InitialCreate"; }
+            get { return "202412182116324_InitialCreate"; }
         }
         
         string IMigrationMetadata.Source

@@ -1,39 +1,51 @@
-﻿@model IEnumerable<Proyecto_BazarLibreria.Models.Carrito>
+﻿@model IEnumerable<Proyecto_BazarLibreria.Models.CarritoItem>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Mi Carrito";
 }
 
-<h2>Index</h2>
+<h2>Mi Carrito</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Usuario.Nombre)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Total)
-        </th>
-        <th></th>
-    </tr>
-
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Usuario.Nombre)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Total)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
-        </td>
-    </tr>
+@if (!Model.Any())
+{
+    <p>No tienes productos en tu carrito.</p>
 }
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Precio Unitario</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Producto.Nombre</td>
+                    <td>@item.Producto.Precio.ToString("C")</td>
+                    <td>@item.Cantidad</td>
+                    <td>@(item.Cantidad * item.Producto.Precio).ToString("C")</td>
+                    <td>
+                        @Html.ActionLink("Eliminar", "Eliminar", new { id = item.Id }, new { @class = "btn btn-danger btn-sm" })
+                        <form action="@Url.Action("ActualizarCantidad", "Carrito")" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="number" name="cantidad" value="@item.Cantidad" min="1" class="form-control d-inline" style="width: 60px;" />
+                            <button type="submit" class="btn btn-primary btn-sm">Actualizar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-</table>
+    <h3>Total: @Model.Sum(item => item.Cantidad * item.Producto.Precio).ToString("C")</h3>
+
+    <form action="@Url.Action("Vaciar", "Carrito")" method="post">
+        <button type="submit" class="btn btn-warning">Vaciar Carrito</button>
+    </form>
+}
