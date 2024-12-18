@@ -1,66 +1,53 @@
 ﻿@model Proyecto_BazarLibreria.Models.Producto
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Agregar Producto";
 }
 
-<h2>Create</h2>
+<div class="container mt-4">
+    <h2 class="text-center mb-4">@ViewBag.Title</h2>
 
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
 
-@using (Html.BeginForm()) 
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Producto</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            @Html.LabelFor(model => model.Nombre, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Nombre, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger" })
-            </div>
-        </div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title">Detalles del Producto</h4>
+                <hr />
+                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Precio, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Precio, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Precio, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                <div class="mb-3">
+                    @Html.LabelFor(model => model.Nombre, "Nombre del Producto", htmlAttributes: new { @class = "form-label" })
+                    @Html.EditorFor(model => model.Nombre, new { htmlAttributes = new { @class = "form-control", placeholder = "Ingrese el nombre del producto" } })
+                    @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger" })
+                </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Disponibilidad, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                <div class="checkbox">
-                    @Html.EditorFor(model => model.Disponibilidad)
+                <div class="mb-3">
+                    @Html.LabelFor(model => model.Precio, "Precio", htmlAttributes: new { @class = "form-label" })
+                    @Html.EditorFor(model => model.Precio, new { htmlAttributes = new { @class = "form-control", placeholder = "Ingrese el precio del producto" } })
+                    @Html.ValidationMessageFor(model => model.Precio, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(model => model.Disponibilidad, "Disponibilidad", htmlAttributes: new { @class = "form-label" })
+                    @Html.CheckBoxFor(model => model.Disponibilidad, new { @class = "form-check-input" })
                     @Html.ValidationMessageFor(model => model.Disponibilidad, "", new { @class = "text-danger" })
                 </div>
-            </div>
-        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Estado, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                <div class="checkbox">
-                    @Html.EditorFor(model => model.Estado)
+                <div class="mb-3">
+                    @Html.LabelFor(model => model.Estado, "Estado", htmlAttributes: new { @class = "form-label" })
+                    @Html.CheckBoxFor(model => model.Estado, new { @class = "form-check-input" })
                     @Html.ValidationMessageFor(model => model.Estado, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Agregar Producto</button>
+                    @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-secondary ms-2" })
                 </div>
             </div>
         </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
-            </div>
-        </div>
-    </div>
-}
-
-<div>
-    @Html.ActionLink("Back to List", "Index")
+    }
 </div>
 
 @section Scripts {

@@ -1,51 +1,50 @@
 ﻿@model IEnumerable<Proyecto_BazarLibreria.Models.Producto>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Lista de Productos";
 }
 
-<h2>Index</h2>
+<div class="container mt-4">
+    <h2 class="text-center mb-4">@ViewBag.Title</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Nombre)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Precio)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Disponibilidad)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Estado)
-        </th>
-        <th></th>
-    </tr>
+    <p class="text-end">
+        @Html.ActionLink("Agregar Producto", "Create", null, new { @class = "btn btn-primary" })
+    </p>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Nombre)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Precio)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Disponibilidad)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Estado)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Codigo }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Codigo }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Codigo })
-        </td>
-    </tr>
-}
-
-</table>
+    <table class="table table-striped table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Nombre)</th>
+                <th>@Html.DisplayNameFor(model => model.Precio)</th>
+                <th>@Html.DisplayNameFor(model => model.Disponibilidad)</th>
+                <th>@Html.DisplayNameFor(model => model.Estado)</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="5" class="text-center">No hay productos disponibles.</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.Nombre)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Precio)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Disponibilidad)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Estado)</td>
+                        <td class="text-center">
+                            @Html.ActionLink("Editar", "Edit", new { id = item.Codigo }, new { @class = "btn btn-warning btn-sm me-1" })
+                            @Html.ActionLink("Detalles", "Details", new { id = item.Codigo }, new { @class = "btn btn-info btn-sm me-1" })
+                            @Html.ActionLink("Eliminar", "Delete", new { id = item.Codigo }, new { @class = "btn btn-danger btn-sm" })
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
