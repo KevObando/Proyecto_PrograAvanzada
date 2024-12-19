@@ -23,6 +23,33 @@
     </dl>
 </div>
 
+<div>
+    <h4>Imágenes</h4>
+    <hr />
+    @if (Model.Imagenes != null && Model.Imagenes.Any())
+    {
+        <div class="row">
+            @foreach (var imagen in Model.Imagenes)
+            {
+                <div class="col-md-3 text-center">
+                    <img src="@Url.Content(imagen.Url)" alt="Imagen del producto" class="img-thumbnail" style="max-height: 200px;" />
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <form action="@Url.Action("EliminarImagen", "Producto")" method="post" class="mt-2">
+                            <input type="hidden" name="imagenId" value="@imagen.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>No hay imágenes disponibles para este producto.</p>
+    }
+</div>
+
 <p>
     @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-secondary" })
     @if (User.IsInRole("Admin"))

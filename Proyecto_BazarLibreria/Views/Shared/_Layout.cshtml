@@ -12,7 +12,7 @@
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
         <div class="container">
             <!-- Cambiado a "Librería" -->
-            @Html.ActionLink("Librería", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            @Html.ActionLink("Librería La Historia", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -31,8 +31,35 @@
     <div class="container body-content">
         @RenderBody()
         <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - Mi aplicación ASP.NET</p>
+        <footer class="bg-dark text-white py-3 mt-4">
+            <div class="container text-center">
+                <p>&copy; @DateTime.Now.Year - Librería La historia</p>
+                <p>
+                    Diseñado por <a href="https://tusitio.com" class="text-white text-decoration-none" target="_blank">Equipo Grupo B</a>
+                </p>
+                <ul class="list-inline">
+                    <li class="list-inline-item">
+                        <a href="/Home/Privacy" class="text-white text-decoration-none">Política de Privacidad</a>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="/Home/Terms" class="text-white text-decoration-none">Términos de Uso</a>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="/Home/Contacto" class="text-white text-decoration-none">Contacto</a>
+                    </li>
+                </ul>
+                <div class="social-media mt-2">
+                    <a href="https://facebook.com" class="text-white me-2" target="_blank">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://twitter.com" class="text-white me-2" target="_blank">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://instagram.com" class="text-white" target="_blank">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
         </footer>
     </div>
 

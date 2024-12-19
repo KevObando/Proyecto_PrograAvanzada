@@ -54,10 +54,32 @@ namespace Proyecto_BazarLibreria.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public ActionResult Create(Producto producto)
+        public ActionResult Create(Producto producto, HttpPostedFileBase imagen)
         {
             if (ModelState.IsValid)
             {
+                if (imagen != null && imagen.ContentLength > 0)
+                {
+                    // Manejo de imagen
+                    string carpetaImagenes = Server.MapPath("~/imagenes");
+                    if (!Directory.Exists(carpetaImagenes))
+                    {
+                        Directory.CreateDirectory(carpetaImagenes);
+                    }
+
+                    string nombreArchivo = Path.GetFileName(imagen.FileName);
+                    string rutaCompleta = Path.Combine(carpetaImagenes, nombreArchivo);
+                    imagen.SaveAs(rutaCompleta);
+
+                    var nuevaImagen = new Imagen
+                    {
+                        Url = "~/imagenes/" + nombreArchivo,
+                        ProductoCodigo = producto.Codigo
+                    };
+
+                    producto.Imagenes = new List<Imagen> { nuevaImagen };
+                }
+
                 _context.Productos.Add(producto);
                 _context.SaveChanges();
                 return RedirectToAction("Index");
@@ -72,7 +94,7 @@ namespace Proyecto_BazarLibreria.Controllers
         {
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            var producto = _context.Productos.Find(id);
+            var producto = _context.Productos.Include(p => p.Imagenes).FirstOrDefault(p => p.Codigo == id);
             if (producto == null) return HttpNotFound();
 
             return View(producto);
@@ -81,10 +103,32 @@ namespace Proyecto_BazarLibreria.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public ActionResult Edit(Producto producto)
+        public ActionResult Edit(Producto producto, HttpPostedFileBase imagen)
         {
             if (ModelState.IsValid)
             {
+                if (imagen != null && imagen.ContentLength > 0)
+                {
+                    // Manejo de imagen
+                    string carpetaImagenes = Server.MapPath("~/imagenes");
+                    if (!Directory.Exists(carpetaImagenes))
+                    {
+                        Directory.CreateDirectory(carpetaImagenes);
+                    }
+
+                    string nombreArchivo = Path.GetFileName(imagen.FileName);
+                    string rutaCompleta = Path.Combine(carpetaImagenes, nombreArchivo);
+                    imagen.SaveAs(rutaCompleta);
+
+                    var nuevaImagen = new Imagen
+                    {
+                        Url = "~/imagenes/" + nombreArchivo,
+                        ProductoCodigo = producto.Codigo
+                    };
+
+                    _context.Imagenes.Add(nuevaImagen);
+                }
+
                 _context.Entry(producto).State = EntityState.Modified;
                 _context.SaveChanges();
                 return RedirectToAction("Index");
@@ -93,13 +137,36 @@ namespace Proyecto_BazarLibreria.Controllers
             return View(producto);
         }
 
+        // Eliminar una imagen asociada a un producto
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public ActionResult EliminarImagen(int imagenId)
+        {
+            var imagen = _context.Imagenes.Find(imagenId);
+            if (imagen == null)
+            {
+                return HttpNotFound();
+            }
+
+            var rutaImagen = Server.MapPath(imagen.Url);
+            if (System.IO.File.Exists(rutaImagen))
+            {
+                System.IO.File.Delete(rutaImagen);
+            }
+
+            _context.Imagenes.Remove(imagen);
+            _context.SaveChanges();
+
+            return RedirectToAction("Details", new { id = imagen.ProductoCodigo });
+        }
+
         // Eliminar un producto: Disponible solo para Administradores
         [Authorize(Roles = "Admin")]
         public ActionResult Delete(int? id)
         {
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            var producto = _context.Productos.Find(id);
+            var producto = _context.Productos.Include(p => p.Imagenes).FirstOrDefault(p => p.Codigo == id);
             if (producto == null) return HttpNotFound();
 
             return View(producto);
@@ -110,8 +177,17 @@ namespace Proyecto_BazarLibreria.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult DeleteConfirmed(int id)
         {
-            var producto = _context.Productos.Find(id);
+            var producto = _context.Productos.Include(p => p.Imagenes).FirstOrDefault(p => p.Codigo == id);
             if (producto == null) return HttpNotFound();
+
+            foreach (var imagen in producto.Imagenes)
+            {
+                var rutaImagen = Server.MapPath(imagen.Url);
+                if (System.IO.File.Exists(rutaImagen))
+                {
+                    System.IO.File.Delete(rutaImagen);
+                }
+            }
 
             _context.Productos.Remove(producto);
             _context.SaveChanges();
