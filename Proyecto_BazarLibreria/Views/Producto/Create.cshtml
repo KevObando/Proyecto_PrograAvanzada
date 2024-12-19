@@ -1,55 +1,53 @@
 ﻿@model Proyecto_BazarLibreria.Models.Producto
 
 @{
-    ViewBag.Title = "Agregar Producto";
+    ViewBag.Title = "Crear Producto";
 }
 
-<div class="container mt-4">
-    <h2 class="text-center mb-4">@ViewBag.Title</h2>
+<h2>Crear Producto</h2>
 
-    @using (Html.BeginForm())
-    {
-        @Html.AntiForgeryToken()
-
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h4 class="card-title">Detalles del Producto</h4>
-                <hr />
-                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
-
-                <div class="mb-3">
-                    @Html.LabelFor(model => model.Nombre, "Nombre del Producto", htmlAttributes: new { @class = "form-label" })
-                    @Html.EditorFor(model => model.Nombre, new { htmlAttributes = new { @class = "form-control", placeholder = "Ingrese el nombre del producto" } })
-                    @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger" })
-                </div>
-
-                <div class="mb-3">
-                    @Html.LabelFor(model => model.Precio, "Precio", htmlAttributes: new { @class = "form-label" })
-                    @Html.EditorFor(model => model.Precio, new { htmlAttributes = new { @class = "form-control", placeholder = "Ingrese el precio del producto" } })
-                    @Html.ValidationMessageFor(model => model.Precio, "", new { @class = "text-danger" })
-                </div>
-
-                <div class="mb-3">
-                    @Html.LabelFor(model => model.Disponibilidad, "Disponibilidad", htmlAttributes: new { @class = "form-label" })
-                    @Html.CheckBoxFor(model => model.Disponibilidad, new { @class = "form-check-input" })
-                    @Html.ValidationMessageFor(model => model.Disponibilidad, "", new { @class = "text-danger" })
-                </div>
-
-                <div class="mb-3">
-                    @Html.LabelFor(model => model.Estado, "Estado", htmlAttributes: new { @class = "form-label" })
-                    @Html.CheckBoxFor(model => model.Estado, new { @class = "form-check-input" })
-                    @Html.ValidationMessageFor(model => model.Estado, "", new { @class = "text-danger" })
-                </div>
-
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary">Agregar Producto</button>
-                    @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-secondary ms-2" })
-                </div>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        <h4>Producto</h4>
+        <hr />
+        <div class="form-group">
+            @Html.LabelFor(model => model.Nombre, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Nombre, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger" })
             </div>
         </div>
-    }
-</div>
-
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+        <div class="form-group">
+            @Html.LabelFor(model => model.Precio, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Precio, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Precio, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Disponibilidad, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.CheckBoxFor(model => model.Disponibilidad)
+                @Html.ValidationMessageFor(model => model.Disponibilidad, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Estado, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.CheckBoxFor(model => model.Estado)
+                @Html.ValidationMessageFor(model => model.Estado, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Guardar" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
 }
+
+<p>
+    @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-secondary" })
+</p>

@@ -16,28 +16,37 @@ namespace Proyecto_BazarLibreria.Models
         public bool Estado { get; set; } // Activo/Inactivo
 
         // Relación con otras tablas
-        public ICollection<Imagen> Imagenes { get; set; }
-        public ICollection<Reseña> Reseñas { get; set; }
-        public ICollection<CarritoItem> CarritoItems { get; set; }
+        public ICollection<Imagen> Imagenes { get; set; } = new List<Imagen>();
+        public ICollection<Reseña> Reseñas { get; set; } = new List<Reseña>();
+        public ICollection<CarritoItem> CarritoItems { get; set; } = new List<CarritoItem>();
     }
     public class Imagen
     {
-
         public int Id { get; set; } // PK
         public string Url { get; set; }
+
+        // Relación con Producto
         public int ProductoCodigo { get; set; } // FK
         public Producto Producto { get; set; }
+
     }
 
     public class Reseña
-    {
-        public int Id { get; set; }
-        public int ProductoId { get; set; }
-        public string Usuario { get; set; }
-        public string Comentario { get; set; }
-        public int Calificación { get; set; }  // Por ejemplo, una calificación de 1 a 5
-        public DateTime Fecha { get; set; }
 
-        public virtual Producto Producto { get; set; }
+    {
+        public int Id { get; set; } // PK
+
+        // Relación con Producto
+        public int ProductoId { get; set; }
+        public Producto Producto { get; set; }
+
+        // Relación con Usuario
+        public string UsuarioId { get; set; } // FK a AspNetUsers
+
+        // Propiedades adicionales
+        public string Comentario { get; set; }
+        public int Calificacion { get; set; } // Por ejemplo, una calificación de 1 a 5
+        public DateTime Fecha { get; set; }
     }
+
 }

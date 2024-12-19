@@ -6,117 +6,134 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.AspNet.Identity;
 using Proyecto_BazarLibreria.Models;
 
 namespace Proyecto_BazarLibreria.Controllers
 {
+    [Authorize]
     public class PedidoController : Controller
     {
-        private LibreriaBazarDbContext db = new LibreriaBazarDbContext();
+        private readonly LibreriaBazarDbContext _context;
 
-        // GET: Pedido
-        public ActionResult Index()
+        public PedidoController()
         {
-            var pedidos = db.Pedidos.Include(p => p.Historial);
-            return View(pedidos.ToList());
+            _context = new LibreriaBazarDbContext();
         }
 
-        // GET: Pedido/Details/5
+        // Listado de pedidos
+        public ActionResult Index()
+        {
+            var userId = User.Identity.GetUserId();
+
+            // Mostrar todos los pedidos si es admin, solo los del usuario autenticado si no
+            var pedidos = User.IsInRole("Admin")
+                ? _context.Pedidos.Include("Historial").ToList()
+                : _context.Pedidos.Where(p => p.UsuarioId == userId).Include("Historial").ToList();
+
+            return View(pedidos);
+        }
+
+        // Detalles de un pedido
         public ActionResult Details(int? id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Pedido pedido = db.Pedidos.Find(id);
-            if (pedido == null)
-            {
-                return HttpNotFound();
-            }
+            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var userId = User.Identity.GetUserId();
+
+            var pedido = _context.Pedidos
+                .Include("Historial")
+                .FirstOrDefault(p => p.Id == id && (User.IsInRole("Admin") || p.UsuarioId == userId));
+
+            if (pedido == null) return HttpNotFound();
+
             return View(pedido);
         }
 
-        // GET: Pedido/Create
+        // Crear un nuevo pedido
         public ActionResult Create()
         {
-            ViewBag.HistorialId = new SelectList(db.Historiales, "Id", "Id");
             return View();
         }
 
-        // POST: Pedido/Create
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,HistorialId,Fecha,Total")] Pedido pedido)
+        public ActionResult Create(Pedido pedido)
         {
             if (ModelState.IsValid)
             {
-                db.Pedidos.Add(pedido);
-                db.SaveChanges();
+                pedido.UsuarioId = User.Identity.GetUserId();
+                pedido.Fecha = DateTime.Now;
+
+                _context.Pedidos.Add(pedido);
+                _context.SaveChanges();
+
                 return RedirectToAction("Index");
             }
 
-            ViewBag.HistorialId = new SelectList(db.Historiales, "Id", "Id", pedido.HistorialId);
             return View(pedido);
         }
 
-        // GET: Pedido/Edit/5
+        // Editar un pedido
         public ActionResult Edit(int? id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Pedido pedido = db.Pedidos.Find(id);
-            if (pedido == null)
-            {
-                return HttpNotFound();
-            }
-            ViewBag.HistorialId = new SelectList(db.Historiales, "Id", "Id", pedido.HistorialId);
+            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var userId = User.Identity.GetUserId();
+
+            var pedido = _context.Pedidos.FirstOrDefault(p => p.Id == id && (User.IsInRole("Admin") || p.UsuarioId == userId));
+
+            if (pedido == null) return HttpNotFound();
+
             return View(pedido);
         }
 
-        // POST: Pedido/Edit/5
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
-        // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,HistorialId,Fecha,Total")] Pedido pedido)
+        public ActionResult Edit(Pedido pedido)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(pedido).State = EntityState.Modified;
-                db.SaveChanges();
+                var pedidoDb = _context.Pedidos.FirstOrDefault(p => p.Id == pedido.Id);
+
+                if (pedidoDb == null) return HttpNotFound();
+
+                // Solo permitir editar ciertas propiedades
+                pedidoDb.Total = pedido.Total;
+
+                _context.SaveChanges();
+
                 return RedirectToAction("Index");
             }
-            ViewBag.HistorialId = new SelectList(db.Historiales, "Id", "Id", pedido.HistorialId);
+
             return View(pedido);
         }
 
-        // GET: Pedido/Delete/5
+        // Eliminar un pedido
         public ActionResult Delete(int? id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Pedido pedido = db.Pedidos.Find(id);
-            if (pedido == null)
-            {
-                return HttpNotFound();
-            }
+            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var userId = User.Identity.GetUserId();
+
+            var pedido = _context.Pedidos.FirstOrDefault(p => p.Id == id && (User.IsInRole("Admin") || p.UsuarioId == userId));
+
+            if (pedido == null) return HttpNotFound();
+
             return View(pedido);
         }
 
-        // POST: Pedido/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Pedido pedido = db.Pedidos.Find(id);
-            db.Pedidos.Remove(pedido);
-            db.SaveChanges();
+            var pedido = _context.Pedidos.Find(id);
+
+            if (pedido == null) return HttpNotFound();
+
+            _context.Pedidos.Remove(pedido);
+            _context.SaveChanges();
+
             return RedirectToAction("Index");
         }
 
@@ -124,8 +141,9 @@ namespace Proyecto_BazarLibreria.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                _context.Dispose();
             }
+
             base.Dispose(disposing);
         }
     }
